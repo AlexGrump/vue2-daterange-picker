@@ -69,20 +69,17 @@
 
                 <div class="py-5">
                     <h1>Demo</h1>
-                    <div class="form-group">
-                        <label>Select range: </label>
-                        <date-range-picker
+                    <div class="form-group form-row">
+                        <label class="col-auto col-form-label">Select range</label>
+                        <div class="col-auto flex-grow-1">
+                            <date-range-picker
+                                class="d-block"
                                 :opens="opens"
                                 :startDate="startDate"
                                 :endDate="endDate"
-                                @update="updateValues"
-                                :locale-data="{ firstDay: 1, format: 'DD-MM-YYYY' }"
                                 :minDate="minDate" :maxDate="maxDate"
-                        >
-                            <div slot="input" slot-scope="picker">
-                                {{ picker.startDate | date }} - {{ picker.endDate | date }}
-                            </div>
-                        </date-range-picker>
+                            ></date-range-picker>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -103,7 +100,6 @@
       }
     },
     data () {
-      //                    :locale-data="{ daysOfWeek: [ 'Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб' ] }"
       return {
         opens: 'center',
         startDate: '2017-09-19',

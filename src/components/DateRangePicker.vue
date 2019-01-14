@@ -3,8 +3,8 @@
         <div class="form-control" @click="togglePicker">
             <slot
                 name="input"
-                :startDate="start"
-                :endDate="end"
+                :startDate="pickedDate.start"
+                :endDate="pickedDate.end"
                 :ranges="ranges"
             >
                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
@@ -14,47 +14,66 @@
         </div>
         <transition name="slide-fade" mode="out-in">
             <div
-                    class="daterangepicker dropdown-menu ltr show-ranges"
-                    :class="pickerStyles()"
-                    v-if="open"
-                    v-on-clickaway="clickAway"
+                class="daterangepicker dropdown-menu ltr show-ranges"
+                :class="pickerStyles()"
+                v-if="open"
+                v-on-clickaway="clickAway"
             >
                 <div class="calendars">
                     <calendar-ranges
-                            @clickRange="clickRange"
-                            :ranges="ranges"
+                      @clickRange="clickRange"
+                      :ranges="ranges"
                     ></calendar-ranges>
 
                     <div class="drp-calendar left">
                         <div class="daterangepicker_input hidden-xs" v-if="false">
-                            <input class="input-mini form-control" type="text" name="daterangepicker_start"
-                                   :value="startText"/>
+                            <input 
+                              class="input-mini form-control" 
+                              type="text" 
+                              name="daterangepicker_start"
+                              :value="startText"/>
                             <i class="fa fa-calendar glyphicon glyphicon-calendar"></i>
                         </div>
+                        <time-picker 
+                          v-if="time"
+                          :showSeconds="seconds"
+                          v-model="start" 
+                          class="px-2 mb-2"
+                        ></time-picker>
                         <div class="calendar-table">
-                            <calendar :monthDate="monthDate"
-                                      :locale="locale"
-                                      :start="start" :end="end"
-                                      :minDate="min" :maxDate="max"
-                                      @nextMonth="nextMonth" @prevMonth="prevMonth"
-                                      @dateClick="dateClick" @hoverDate="hoverDate"
+                            <calendar 
+                              :monthDate="monthDate"
+                              :locale="locale"
+                              :start="pickedDate.start" :end="pickedDate.end"
+                              :minDate="min" :maxDate="max"
+                              @nextMonth="nextMonth" @prevMonth="prevMonth"
+                              @dateClick="dateClick" @hoverDate="hoverDate"
                             ></calendar>
                         </div>
                     </div>
 
                     <div class="drp-calendar right hidden-xs">
                         <div class="daterangepicker_input" v-if="false">
-                            <input class="input-mini form-control" type="text" name="daterangepicker_end"
-                                   :value="endText"/>
+                            <input 
+                              class="input-mini form-control" 
+                              type="text" name="daterangepicker_end"
+                              :value="endText"/>
                             <i class="fa fa-calendar glyphicon glyphicon-calendar"></i>
                         </div>
+                        <time-picker 
+                          v-if="time"
+                          :showSeconds="seconds"
+                          v-model="end" 
+                          class="px-2 mb-2"
+                        ></time-picker>
                         <div class="calendar-table">
-                            <calendar :monthDate="nextMonthDate"
-                                      :locale="locale"
-                                      :start="start" :end="end"
-                                      :minDate="min" :maxDate="max"
-                                      @nextMonth="nextMonth" @prevMonth="prevMonth"
-                                      @dateClick="dateClick" @hoverDate="hoverDate"
+                            <calendar 
+                              :monthDate="nextMonthDate"
+                              :locale="locale"
+                              :start="pickedDate.start" :end="pickedDate.end"
+                              :minDate="min" :maxDate="max"
+                              @nextMonth="nextMonth" @prevMonth="prevMonth"
+                              @dateClick="dateClick" @hoverDate="hoverDate"
                             ></calendar>
                         </div>
                     </div>
@@ -62,15 +81,15 @@
 
                 <div class="drp-buttons">
                     <button
-                            class="applyBtn btn btn-sm btn-success"
-                            :disabled="in_selection"
-                            type="button"
-                            @click="clickedApply"
+                      class="applyBtn btn btn-sm btn-success"
+                      :disabled="in_selection"
+                      type="button"
+                      @click="clickedApply"
                     >{{locale.applyLabel}}</button>
                     <button
-                            class="cancelBtn btn btn-sm btn-default"
-                            type="button"
-                            @click="open=false"
+                      class="cancelBtn btn btn-sm btn-default"
+                      type="button"
+                      @click="clickedCancel"
                     >{{locale.cancelLabel}}</button>
                 </div>
 
@@ -80,167 +99,232 @@
 </template>
 
 <script>
-  import moment from 'moment'
-  import Calendar from './Calendar.vue'
-  import CalendarRanges from './CalendarRanges'
-  import {nextMonth, prevMonth} from './util'
-  import {mixin as clickaway} from 'vue-clickaway'
+import moment                   from 'moment'
+import TimePicker               from './TimePicker'
+import Calendar                 from './Calendar.vue'
+import CalendarRanges           from './CalendarRanges'
+import { nextMonth, prevMonth } from './util'
+import { mixin as clickaway }   from 'vue-clickaway'
 
-  export default {
-    components: {Calendar, CalendarRanges},
-    mixins: [clickaway],
-    props: {
-      minDate: [String, Object],
-      maxDate: [String, Object],
-      localeData: {
-        type: Object,
-        default () {
-          return {}
-        },
+export default {
+  components: {
+    Calendar, 
+    CalendarRanges,
+    TimePicker
+  },
+
+  mixins: [
+    clickaway
+  ],
+
+  props: {
+    minDate: [ String, Object ],
+
+    maxDate: [ String, Object ],
+
+    localeData: {
+      type: Object,
+      default () {
+        return {}
       },
-      startDate: {
-        default () {
-          return new Date()
-        }
-      },
-      endDate: {
-        default () {
-          return new Date()
-        }
-      },
-      ranges: {
-        type: Object,
-        default () {
-          return {
-            'Today': [moment(), moment()],
-            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-            'This month': [moment().startOf('month'), moment().endOf('month')],
-            'This year': [moment().startOf('year'), moment().endOf('year')],
-            'Last week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
-            'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-          }
-        }
-      },
-      opens: {
-        type: String,
-        default: 'center'
+    },
+
+    startDate: {
+      default () {
+        return new Date()
       }
     },
-    data () {
-      let default_locale = {
-        direction: 'ltr',
-        format: moment.localeData().longDateFormat('L'),
-        separator: ' - ',
-        applyLabel: 'Apply',
-        cancelLabel: 'Cancel',
-        weekLabel: 'W',
-        customRangeLabel: 'Custom Range',
-        daysOfWeek: moment.weekdaysMin(),
-        monthNames: moment.monthsShort(),
-        firstDay: moment.localeData().firstDayOfWeek()
+
+    endDate: {
+      default () {
+        return new Date()
       }
-
-      // let data = { locale: _locale }
-      let data = {locale: {...default_locale, ...this.localeData}}
-
-      data.monthDate = new Date(this.startDate)
-      data.start = new Date(this.startDate)
-      data.end = new Date(this.endDate)
-      data.in_selection = false
-      data.open = false
-
-      // update day names order to firstDay
-      if (data.locale.firstDay !== 0) {
-        let iterator = data.locale.firstDay
-        while (iterator > 0) {
-          data.locale.daysOfWeek.push(data.locale.daysOfWeek.shift())
-          iterator--
-        }
-      }
-      return data
     },
-    methods: {
-      nextMonth () {
-        this.monthDate = nextMonth(this.monthDate)
-      },
-      prevMonth () {
-        this.monthDate = prevMonth(this.monthDate)
-      },
-      dateClick (value) {
-        if (this.in_selection) {
-          this.in_selection = false
-          this.end = new Date(value)
-          if (this.end < this.start) {
-            this.in_selection = true
-            this.start = new Date(value)
-          }
-        } else {
-          this.in_selection = true
-          this.start = new Date(value)
-          this.end = new Date(value)
-        }
-      },
-      hoverDate (value) {
-        let dt = new Date(value)
-        if (this.in_selection && dt > this.start)
-          this.end = dt
-      },
-      togglePicker () {
-        this.open = !this.open
-      },
-      pickerStyles () {
+
+    ranges: {
+      type: Object,
+      default () {
         return {
-          'show-calendar': this.open,
-          opensright: this.opens === 'right',
-          opensleft: this.opens === 'left',
-          openscenter: this.opens === 'center'
+          'Today': [moment(), moment()],
+          'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+          'This month': [moment().startOf('month'), moment().endOf('month')],
+          'This year': [moment().startOf('year'), moment().endOf('year')],
+          'Last week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
+          'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
         }
-      },
-      clickedApply () {
-        this.open = false
-        this.$emit('update', {startDate: this.start, endDate: this.end})
-      },
-      clickAway () {
-        if (this.open) {
-          this.open = false
-        }
-      },
-      clickRange (value) {
-        this.start = new Date(value[0])
-        this.end = new Date(value[1])
-        this.monthDate = new Date(value[0])
-        this.clickedApply()
       }
     },
-    computed: {
-      nextMonthDate () {
-        return nextMonth(this.monthDate)
-      },
-      startText () {
-        // return this.start.toLocaleDateString()
-        return moment(this.start).format(this.locale.format)
-      },
-      endText () {
-        // return new Date(this.end).toLocaleDateString()
-        return moment(new Date(this.end)).format(this.locale.format)
-      },
-      min () {
-        return this.minDate ? new Date(this.minDate) : null
-      },
-      max () {
-        return this.maxDate ? new Date(this.maxDate) : null
-      }
+
+    opens: {
+      type: String,
+      default: 'center'
     },
-    watch: {
-      startDate (value) {
-        this.start = new Date(value)
+
+    time: {
+      type: Boolean,
+      default: true
+    },
+
+    seconds: {
+      type: Boolean,
+      default: false
+    }
+  },
+
+  data () {
+    const default_locale = {
+      direction: 'ltr',
+      format: 'M/DD/YYYY hh:mm A',
+      separator: ' - ',
+      applyLabel: 'Apply',
+      cancelLabel: 'Cancel',
+      weekLabel: 'W',
+      customRangeLabel: 'Custom Range',
+      daysOfWeek: moment.weekdaysMin(),
+      monthNames: moment.monthsShort(),
+      firstDay: moment.localeData().firstDayOfWeek()
+    }
+
+    const data = {
+      locale: {
+        ...default_locale, 
+        ...this.localeData
       },
-      endDate (value) {
-        this.end = new Date(value)
+
+      monthDate: new Date(this.startDate),
+      start: new Date(this.startDate),
+      end: new Date(this.endDate),
+      in_selection: false,
+      open: false
+    }
+
+    // update day names order to firstDay
+    if (data.locale.firstDay !== 0) {
+      let iterator = data.locale.firstDay
+      while (iterator > 0) {
+        data.locale.daysOfWeek.push(data.locale.daysOfWeek.shift())
+        iterator--
       }
     }
-  }
 
+    return data
+  },
+
+  computed: {
+    pickedDate() {
+      const dates = [
+        new Date(this.start),
+        new Date(this.end)
+      ];
+
+      dates.sort((a, b) => {
+        return b - a;
+      })
+
+      return {
+        start: dates[1],
+        end: dates[0]
+      }
+    },
+
+    nextMonthDate() {
+      return nextMonth(this.monthDate)
+    },
+
+    startText() {
+      return moment(new Date(this.pickedDate.start)).format(this.locale.format)
+    },
+
+    endText() {
+      return moment(new Date(this.pickedDate.end)).format(this.locale.format)
+    },
+
+    min() {
+      return this.minDate ? new Date(this.minDate) : null
+    },
+
+    max() {
+      return this.maxDate ? new Date(this.maxDate) : null
+    }
+  },
+
+  watch: {
+    startDate(value) {
+      this.start = new Date(value)
+    },
+
+    endDate(value) {
+      this.end = new Date(value)
+    }
+  },
+  
+  methods: {
+    nextMonth() {
+      this.monthDate = nextMonth(this.monthDate)
+    },
+
+    prevMonth() {
+      this.monthDate = prevMonth(this.monthDate)
+    },
+
+    dateClick(value) {
+      if (this.in_selection) {
+        this.in_selection = false
+        this.end = new Date(value)
+      } else {
+        this.in_selection = true
+        this.start = new Date(value)
+        this.end = new Date(value)
+      }
+    },
+
+    hoverDate(value) {
+      if(this.in_selection) {
+        this.end = new Date(value)
+      }
+    },
+
+    togglePicker() {
+      this.open = !this.open
+    },
+
+    pickerStyles() {
+      return {
+        'show-calendar': this.open,
+        opensright: this.opens === 'right',
+        opensleft: this.opens === 'left',
+        openscenter: this.opens === 'center'
+      }
+    },
+
+    clickedApply() {
+      this.open = false
+      this.$emit('update', { 
+        startDate: this.pickedDate.start, 
+        endDate: this.pickedDate.end
+      })
+    },
+
+    clickedCancel() {
+      this.open = false
+      this.start = this.startDate
+      this.end = this.endDate
+    },
+
+    clickAway() {
+      if (this.open) {
+        this.open = false
+      }
+    },
+
+    clickRange(value) {
+      this.start = new Date(value[0])
+      this.end = new Date(value[1])
+      this.monthDate = new Date(value[0])
+      this.clickedApply()
+    }
+  }
+}
 </script>
 
 <style lang="scss">
@@ -305,5 +389,4 @@
         transform: translateX(10px);
         opacity: 0;
     }
-
 </style>
