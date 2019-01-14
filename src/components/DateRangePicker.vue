@@ -2,10 +2,10 @@
     <div style="position: relative; display: inline-block;">
         <div class="form-control" @click="togglePicker">
             <slot
-                    name="input"
-                    :startDate="start"
-                    :endDate="end"
-                    :ranges="ranges"
+                name="input"
+                :startDate="start"
+                :endDate="end"
+                :ranges="ranges"
             >
                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
                 <span>{{startText}} - {{endText}}</span>
