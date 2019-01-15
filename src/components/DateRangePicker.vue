@@ -271,6 +271,10 @@ export default {
       if (this.in_selection) {
         this.in_selection = false
         this.end = new Date(value)
+
+        if(new Date(this.end) < new Date(this.start)) {
+          [this.start, this.end] = [this.end, this.start]
+        }
       } else {
         this.in_selection = true
         this.start = new Date(value)
@@ -340,7 +344,7 @@ export default {
         width: 100%;
     }
 
-    .daterangepicker{
+    .daterangepicker {
         flex-direction: column;
         display: flex;
         width: auto;
@@ -356,7 +360,7 @@ export default {
 
     div.daterangepicker.opensleft {
         top: 35px;
-        right: 10px;
+        right: 0px;
         left: auto;
     }
 
@@ -369,7 +373,7 @@ export default {
 
     div.daterangepicker.opensright {
         top: 35px;
-        left: 10px;
+        left: 0px;
         right: auto;
     }
 
@@ -383,9 +387,8 @@ export default {
         transition: all .1s cubic-bezier(1.0, 0.5, 0.8, 1.0);
     }
 
-    .slide-fade-enter, .slide-fade-leave-to
-        /* .slide-fade-leave-active for <2.1.8 */
-    {
+    .slide-fade-enter, 
+    .slide-fade-leave-to {
         transform: translateX(10px);
         opacity: 0;
     }
