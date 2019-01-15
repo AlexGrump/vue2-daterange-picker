@@ -5,6 +5,7 @@
       <select 
         class="form-control form-control-sm time-picker-input"
         v-model="hours"
+        :disabled="!value"
       >
         <option
           v-for="item in hoursOptions"
@@ -18,6 +19,7 @@
       <select 
         class="form-control form-control-sm time-picker-input"
         v-model="minutes"
+        :disabled="!value"
       >
         <option
           v-for="item in minutesOptions"
@@ -32,6 +34,7 @@
         <select 
           class="form-control form-control-sm time-picker-input"
           v-model="seconds"
+          :disabled="!value"
         >
           <option
             v-for="item in secondsOptions"

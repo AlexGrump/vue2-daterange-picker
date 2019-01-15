@@ -113,7 +113,7 @@
 }
 
 .daterangepicker .drp-calendar.left {
-  padding: 8px 0 8px 8px;
+  padding: 8px;
 }
 
 .daterangepicker .drp-calendar.right {
@@ -351,8 +351,6 @@
           border-left: none;
           border-top-left-radius: 0;
           border-bottom-left-radius: 0; }
-      .daterangepicker.ltr .drp-calendar.left .calendar-table {
-        padding-right: 8px; }
       .daterangepicker.ltr .ranges, .daterangepicker.ltr .drp-calendar {
         float: left; }
     .daterangepicker.rtl {
@@ -371,8 +369,7 @@
           border-right: none;
           border-top-right-radius: 0;
           border-bottom-right-radius: 0; }
-      .daterangepicker.rtl .drp-calendar.left .calendar-table {
-        padding-left: 12px; }
+      .daterangepicker.rtl .drp-calendar.left .calendar-table { }
       .daterangepicker.rtl .ranges, .daterangepicker.rtl .drp-calendar {
         text-align: right;
         float: right; } }

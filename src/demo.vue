@@ -14,8 +14,24 @@
             </p>
         </div>
 
-        <div class="card bg-light" style="margin-bottom: 300px;">
-            <div class=" card-body">
+        <div class="card bg-light" style="margin-bottom: 60px;">
+            <div class="card-body">
+                <h1>Demo</h1>
+                <div class="form-group form-row">
+                    <label class="col-auto col-form-label">Select range</label>
+                    <div class="col-auto flex-grow-1">
+                        <date-range-picker
+                            class="d-block"
+                            :startDate="startDate" :endDate="endDate"
+                            :minDate="minDate" :maxDate="maxDate"
+                            @update="updateValues"
+                        ></date-range-picker>
+                    </div>
+                </div>
+
+                <pre>{{ { startDate, endDate } }}</pre>
+
+                <!-- <h3 class="mt-5">Options</h3>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group row">
@@ -44,7 +60,7 @@
                                 <input type="text" class="form-control" id="maxDate" v-model="maxDate">
                             </div>
                         </div>
-                    </div>
+                    </div> 
                 </div>
 
                 <div class="form-group">
@@ -65,57 +81,51 @@
                         <label class="form-check-label">right</label>
                     </div>
                 </div>
-                <span class="form-text text-muted">(string: 'left'/'right'/'center') Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to</span>
-
-                <div class="py-5">
-                    <h1>Demo</h1>
-                    <div class="form-group form-row">
-                        <label class="col-auto col-form-label">Select range</label>
-                        <div class="col-auto flex-grow-1">
-                            <date-range-picker
-                                class="d-block"
-                                :opens="opens"
-                                :startDate="startDate"
-                                :endDate="endDate"
-                                :minDate="minDate" :maxDate="maxDate"
-                            ></date-range-picker>
-                        </div>
-                    </div>
-                </div>
+                <span class="form-text text-muted">(string: 'left'/'right'/'center') Whether the picker appears aligned to the left, to the right, or centered under the HTML element it's attached to</span>-->                
             </div>
         </div>
     </div>
 </template>
 
 <script>
-  import DateRangePicker from './components/DateRangePicker'
+import DateRangePicker from './components/DateRangePicker'
 
-  export default {
-    components: {DateRangePicker},
+export default {
     name: 'DateRangePickerDemo',
+
+    components: {
+        DateRangePicker
+    },
+
     filters: {
-      date (value) {
-        let options = {year: 'numeric', month: 'long', day: 'numeric'};
-        return Intl.DateTimeFormat('en-US', options).format(value)
-      }
+        date(value) {
+            let options = {
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            }
+
+            return Intl.DateTimeFormat('en-US', options).format(value)
+        }
     },
-    data () {
-      return {
-        opens: 'center',
-        startDate: '2017-09-19',
-        endDate: '2017-10-09',
-        minDate: '2017-09-02',
-        maxDate: '2017-10-02',
-      }
+
+    data() {
+        return {
+            opens: 'center',
+            startDate: '2017-09-19 11:30',
+            endDate: '2017-10-09 12:15',
+            minDate: '2017-09-02 0:00',
+            maxDate: '2018-10-02 11:59',
+        }
     },
+
     methods: {
-      updateValues (values) {
-        console.log(values)
-        this.startDate = values.startDate.toISOString().slice(0, 10)
-        this.endDate = values.endDate.toISOString().slice(0, 10)
-      }
+        updateValues(values) {
+            this.startDate = values.startDate
+            this.endDate = values.endDate
+        }
     }
-  }
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

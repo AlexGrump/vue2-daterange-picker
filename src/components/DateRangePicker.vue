@@ -8,7 +8,7 @@
                 :ranges="ranges"
             >
                 <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
-                <span>{{startText}} - {{endText}}</span>
+                <span>{{ startText }} - {{ endText }}</span>
                 <b class="caret"></b>
             </slot>
         </div>
@@ -34,6 +34,20 @@
                               :value="startText"/>
                             <i class="fa fa-calendar glyphicon glyphicon-calendar"></i>
                         </div>
+
+                        <div class="row align-items-center mb-3">
+                          <div class="col-auto flex-grow-1">
+                            <div class="h6 m-0">Start date:</div>
+                          </div>
+                          <div class="col-auto">
+                            <div 
+                              class="btn btn-sm btn-primary" 
+                              @click="clearStart"
+                              :class="{ disabled: in_selection }"
+                            >Clear</div>
+                          </div>
+                        </div>
+
                         <time-picker 
                           v-if="time"
                           :showSeconds="seconds"
@@ -60,6 +74,20 @@
                               :value="endText"/>
                             <i class="fa fa-calendar glyphicon glyphicon-calendar"></i>
                         </div>
+
+                        <div class="row align-items-center mb-3">
+                          <div class="col-auto flex-grow-1">
+                            <div class="h6 m-0">End date:</div>
+                          </div>
+                          <div class="col-auto">
+                            <div 
+                              class="btn btn-sm btn-primary" 
+                              @click="clearEnd"
+                              :class="{ disabled: in_selection }"
+                            >Clear</div>
+                          </div>
+                        </div>
+                        
                         <time-picker 
                           v-if="time"
                           :showSeconds="seconds"
@@ -130,15 +158,11 @@ export default {
     },
 
     startDate: {
-      default () {
-        return new Date()
-      }
+      default: null
     },
 
     endDate: {
-      default () {
-        return new Date()
-      }
+      default: null
     },
 
     ranges: {
@@ -191,9 +215,9 @@ export default {
         ...this.localeData
       },
 
-      monthDate: new Date(this.startDate),
-      start: new Date(this.startDate),
-      end: new Date(this.endDate),
+      monthDate: this.startDate !== null ? new Date(this.startDate) : new Date(),
+      start: this.startDate !== null ? new Date(this.startDate) : null,
+      end: this.endDate !== null ? new Date(this.endDate) : null,
       in_selection: false,
       open: false
     }
@@ -213,17 +237,24 @@ export default {
   computed: {
     pickedDate() {
       const dates = [
-        new Date(this.start),
-        new Date(this.end)
+        this.start,
+        this.end
       ];
 
-      dates.sort((a, b) => {
-        return b - a;
-      })
+      if(this.start && this.end) {
+        dates.sort((a, b) => {
+          return b - a;
+        })
+
+        return {
+          start: dates[1],
+          end: dates[0]
+        }
+      }
 
       return {
-        start: dates[1],
-        end: dates[0]
+        start: this.start,
+        end: this.end
       }
     },
 
@@ -232,10 +263,18 @@ export default {
     },
 
     startText() {
+      if(this.pickedDate.start === null) {
+        return '...'
+      }
+
       return moment(new Date(this.pickedDate.start)).format(this.locale.format)
     },
 
     endText() {
+      if(this.pickedDate.end === null) {
+        return '...'
+      }
+
       return moment(new Date(this.pickedDate.end)).format(this.locale.format)
     },
 
@@ -250,15 +289,27 @@ export default {
 
   watch: {
     startDate(value) {
-      this.start = new Date(value)
+      if(value !== null) {
+        this.start = new Date(value)
+      }
     },
 
     endDate(value) {
-      this.end = new Date(value)
+      if(value !== null) {
+        this.end = new Date(value)
+      }
     }
   },
   
   methods: {
+    clearStart() {
+      this.start = null;
+    },
+
+    clearEnd() {
+      this.end = null;
+    },
+
     nextMonth() {
       this.monthDate = nextMonth(this.monthDate)
     },
