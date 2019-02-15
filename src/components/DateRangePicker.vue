@@ -175,6 +175,7 @@ export default {
           'This year': [moment().startOf('year'), moment().endOf('year')],
           'Last week': [moment().subtract(1, 'week').startOf('week'), moment().subtract(1, 'week').endOf('week')],
           'Last month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+          'All time': [ null, null ],
         }
       }
     },
@@ -206,7 +207,9 @@ export default {
       customRangeLabel: 'Custom Range',
       daysOfWeek: moment.weekdaysMin(),
       monthNames: moment.monthsShort(),
-      firstDay: moment.localeData().firstDayOfWeek()
+      firstDay: moment.localeData().firstDayOfWeek(),
+      startNotSet: 'Start date not set',
+      endNotSet: 'End date not set'
     }
 
     const data = {
@@ -263,27 +266,27 @@ export default {
     },
 
     startText() {
-      if(this.pickedDate.start === null) {
-        return '...'
-      }
-
-      return moment(new Date(this.pickedDate.start)).format(this.locale.format)
+      return this.pickedDate.start === null
+        ? this.locale.startNotSet
+        : moment(new Date(this.pickedDate.start)).format(this.locale.format)
     },
 
     endText() {
-      if(this.pickedDate.end === null) {
-        return '...'
-      }
-
-      return moment(new Date(this.pickedDate.end)).format(this.locale.format)
+      return this.pickedDate.end === null
+        ? this.locale.endNotSet
+        : moment(new Date(this.pickedDate.end)).format(this.locale.format)
     },
 
     min() {
-      return this.minDate ? new Date(this.minDate) : null
+      return this.minDate 
+        ? new Date(this.minDate) 
+        : null
     },
 
     max() {
-      return this.maxDate ? new Date(this.maxDate) : null
+      return this.maxDate 
+        ? new Date(this.maxDate) 
+        : null
     }
   },
 
@@ -373,9 +376,21 @@ export default {
     },
 
     clickRange(value) {
-      this.start = new Date(value[0])
-      this.end = new Date(value[1])
-      this.monthDate = new Date(value[0])
+      const start = value[0]
+      const end = value[1]
+
+      this.start = start === null 
+        ? null 
+        : new Date(start)
+
+      this.end = end === null 
+        ? null 
+        : new Date(end)
+
+      this.monthDate = start === null 
+        ? new Date()
+        : new Date(start)
+
       this.clickedApply()
     }
   }
